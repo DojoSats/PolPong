@@ -3,7 +3,6 @@ name: Deploy Next.js site to Pages
 on:
   push:
     branches: ["main"]
-
   workflow_dispatch:
 
 permissions:
@@ -22,7 +21,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      # Detect if npm or yarn is being used
       - name: Detect package manager
         id: detect-package-manager
         run: |
@@ -33,7 +31,7 @@ jobs:
           elif [ -f "${{ github.workspace }}/package.json" ]; then
             echo "manager=npm" >> $GITHUB_OUTPUT
             echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npm run" >> $GITHUB_OUTPUT
+            echo "runner=npx" >> $GITHUB_OUTPUT
           else
             echo "Unable to determine package manager"
             exit 1
@@ -63,7 +61,10 @@ jobs:
         run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
 
       - name: Build with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build && next export
+        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+
+      - name: Static HTML export with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next export
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
